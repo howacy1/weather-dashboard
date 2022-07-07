@@ -13,18 +13,19 @@ function initPage() {
     var todayweatherEl = document.getElementById("today-weather");
     let searchHistory = JSON.parse(localStorage.getItem("search")) || [];
 
-    
+    // API Key from open weather map
     const APIKey = "531e668a8a1e31704cbf90bb6305a2b4";
-
-    function getWeather(cityName) {
     
+    function getWeather(cityName) {
+
+        // request for current weather from open weather API
         let queryURL = "https://api.openweathermap.org/data/2.5/weather?q=" + cityName + "&appid=" + APIKey;
         axios.get(queryURL)
             .then(function (response) {
 
                 todayweatherEl.classList.remove("d-none");
 
-                
+                //  parse response to display current weather
                 const currentDate = new Date(response.data.dt * 1000);
                 const day = currentDate.getDate();
                 const month = currentDate.getMonth() + 1;
@@ -37,7 +38,7 @@ function initPage() {
                 currentHumidityEl.innerHTML = "Humidity: " + response.data.main.humidity + "%";
                 currentWindEl.innerHTML = "Wind Speed: " + response.data.wind.speed + " MPH";
                 
-                
+                // UV index section, requests UV index with coordinates from open weather API
                 let lat = response.data.coord.lat;
                 let lon = response.data.coord.lon;
                 let UVQueryURL = "https://api.openweathermap.org/data/2.5/uvi/forecast?lat=" + lat + "&lon=" + lon + "&appid=" + APIKey + "&cnt=1";
@@ -45,7 +46,7 @@ function initPage() {
                     .then(function (response) {
                         let UVIndex = document.createElement("span");
                         
-                        
+                        // sets color depending on the index value
                         if (response.data[0].value < 4 ) {
                             UVIndex.setAttribute("class", "badge badge-success");
                         }
@@ -61,14 +62,14 @@ function initPage() {
                         currentUVEl.append(UVIndex);
                     });
                 
-                
+                // 5 day forecast, request forecast for current city from open weather API
                 let cityID = response.data.id;
                 let forecastQueryURL = "https://api.openweathermap.org/data/2.5/forecast?id=" + cityID + "&appid=" + APIKey;
                 axios.get(forecastQueryURL)
                     .then(function (response) {
                         fivedayEl.classList.remove("d-none");
                         
-                        
+                        // parse response to display forecast
                         const forecastEls = document.querySelectorAll(".forecast");
                         for (i = 0; i < forecastEls.length; i++) {
                             forecastEls[i].innerHTML = "";
@@ -98,7 +99,7 @@ function initPage() {
             });
     }
 
-    
+    // pulls history from local storage
     searchEl.addEventListener("click", function () {
         const searchTerm = cityEl.value;
         getWeather(searchTerm);
@@ -107,7 +108,7 @@ function initPage() {
         renderSearchHistory();
     })
 
-    
+    // clear history button
     clearEl.addEventListener("click", function () {
         localStorage.clear();
         searchHistory = [];
